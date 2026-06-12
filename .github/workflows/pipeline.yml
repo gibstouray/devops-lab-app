@@ -1,0 +1,28 @@
+name: DevOps Lab Pipeline
+on:
+    push:
+        branches: [main]
+
+jobs:
+    build-and-test:
+        runs-on: [self-hosted, linux]
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v3
+
+            - name: Install dependencies
+              run: |
+                  run: npm install
+
+            - name: Run tests
+              run: |
+                  run: npm test
+
+    deploy:
+        needs: build-and-test
+        runs-on: [self-hosted, linux]
+        steps:
+            - name: Deploy to App Server
+              run: |
+                  ssh -o StrictHostKeyChecking=no vagrant@192.168.56.10 \
+                  'cd /opt/app && git pull && npm && pm2 restart app || pm2 start app.js --name app'
